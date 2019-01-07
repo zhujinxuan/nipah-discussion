@@ -68,9 +68,6 @@ function Root(Logic) {
       return {rootNode : newRoot}
     })
 
-    const {render} = Logic;
-    const 
-
     return <Node Logic={Logic} node={this.state.rootNode} inputCB = {inputCB} />
   }
 }
