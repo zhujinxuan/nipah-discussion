@@ -1,0 +1,80 @@
+# 一个粗躁的表单描述咪啪
+
+** Data
+
+The Form will be considered as a tree.  The bottom leaves are node with leaves equal to Nothing.
+
+Type is a 'string' to describe the type of node, used for rendering and validation.
+
+Key is unique to each node, used for finding the path to that node.
+
+#+BEGIN_SRC javascript
+  const node = {
+    key :: Key
+    type :: any,
+    leaves :: [Node] | Nothing,
+    [any] :: [any]
+  }
+#+END_SRC
+
+** Middleware
+
+#+BEGIN_SRC javascript
+  type PT = String | Int | ....|
+
+  const plugin = {
+    input :: PT -> Node -> Node | Nothing,
+    validation :: Node -> Node
+    render(leaves, next, inputCB, node) :: ([ReactDOM]) -> (Node -> ReactDOM) -> InputCB -> Node -> ReactDOM
+  }
+#+END_SRC
+
+For each user input, input function help us calculate the new Node after the input.  
+
+If Node is changed for the input, a validation will be run on this new Node and every ancestors of this node.
+
+Render function will help us get the new ReactDOM after rendering.
+
+
+** Rendering
+Suppose we bind all plugins into the following object,
+
+#+BEGIN_SRC javascript
+  type PT = String | Int | ....|
+
+  const Logic = {
+    input :: PT -> Node -> Node
+    validation :: Node -> Node
+    render(inputCB, node) :: InputCB -> Node -> ReactDOM
+  }
+#+END_SRC
+
+Then we may have a Root component as a store:
+
+#+BEGIN_SRC javascript
+function Root(Logic) {
+  const inputCB = (pt, node) => {
+    this.setState( ({rootNode}) => {
+      if (!hasDescendant(rootNode, node)) return;
+      const newNode = Logic.input(pt, node);
+      if (newNode === node) return;
+      let newRoot = rootNode.setIn(pathTo(node), newNode);
+
+      for (key in getAncestors(newRoot, newNode)) {
+        // validate with ancestor like in 
+        // https://github.com/ianstormtaylor/slate/blob/76a88a649a9ec7d27d207416d94b3de1de0828d6/packages/slate/src/controllers/editor.js#L569
+      }
+      
+      return {rootNode : newRoot}
+    })
+
+    const {render} = Logic;
+    const 
+
+    return <Node Logic={Logic} node={this.state.rootNode} inputCB = {inputCB} />
+  }
+}
+function Node(({Logic, node, inputCB})) {
+   return Logic.render(inputCB, node);
+}
+#+END_SRC
